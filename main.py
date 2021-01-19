@@ -18,7 +18,7 @@ oauth = OAuth1(
 
 def tweet(section, title, link):
     message = f'{title}: {link} #{section} #SGLiveNews'
-    req = requests.post(
+    requests.post(
         'https://api.twitter.com/1.1/statuses/update.json',
         params={
             'status': message
@@ -27,6 +27,16 @@ def tweet(section, title, link):
             'User-Agent': 'SGLiveNews'
         },
         auth=oauth
+    )
+
+def telegram(section, title, link):
+    message = f'{title}: {link} #{section} #SGLiveNews'
+    requests.post(
+        f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendMessage',
+        params={
+            'chat_id': '@sglivenews',
+            'text': message,
+        }
     )
 
 BASE = 'https://www.straitstimes.com/news/{feed}/rss.xml'
@@ -59,8 +69,9 @@ while True:
             link = articles[0].findtext('link')
             if title != v:
                 tweet(k, title, link)
+                telegram(k, title, link)
+                QUERY[k] = title
                 with open('save.json', 'w+') as f:
                     json.dump(QUERY, f)
 
-                QUERY[k] = title
     time.sleep(3)
