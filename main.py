@@ -54,6 +54,8 @@ try:
 except FileNotFoundError:
     pass
 
+print('Started')
+
 while True:
     for k, v in QUERY.items():
         req = requests.get(
@@ -71,6 +73,7 @@ while True:
                 tweet(k, title, link)
                 telegram(k, title, link)
                 QUERY[k] = title
+                print(f'Posted {title}')
                 with open('save.json', 'w+') as f:
                     json.dump(QUERY, f)
 
