@@ -33,7 +33,7 @@ def telegram(section, title, link):
     message = f'{title}: {link} #{section} #SGLiveNews'
     requests.post(
         f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendMessage',
-        params={
+        json={
             'chat_id': '@sglivenews',
             'text': message,
         }
