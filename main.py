@@ -30,6 +30,7 @@ def tweet(section, title, link):
     )
 
 def telegram(section, title, link):
+    link = f'https://t.me/iv?url={link}&rhash=5e3df8a7095695'
     message = f'{title}: {link} #{section} #SGLiveNews'
     requests.post(
         f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendMessage',
@@ -41,11 +42,11 @@ def telegram(section, title, link):
 
 BASE = 'https://www.straitstimes.com/news/{feed}/rss.xml'
 QUERY = {
-    'singapore': None,
-    'asia': None,
-    'tech': None,
-    'world': None,
-    'opinion': None
+    'singapore': [],
+    'asia': [],
+    'tech': [],
+    'world': [],
+    'opinion': []
 }
 
 try:
@@ -69,10 +70,11 @@ while True:
             title = articles[0].findtext('title')
             description = articles[0].findtext('description')
             link = articles[0].findtext('link')
-            if title != v:
+            if title not in v:
                 tweet(k, title, link)
                 telegram(k, title, link)
-                QUERY[k] = title
+                QUERY[k].append(title)
+                QUERY[k] = QUERY[k][-5:]
                 print(f'Posted {title}')
                 with open('save.json', 'w+') as f:
                     json.dump(QUERY, f)
