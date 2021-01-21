@@ -74,7 +74,6 @@ while True:
                 tweet(k, title, link)
                 telegram(k, title, link)
                 QUERY[k].append(title)
-                QUERY[k] = QUERY[k][-5:]
                 print(f'Posted {title}')
                 with open('save.json', 'w+') as f:
                     json.dump(QUERY, f)
