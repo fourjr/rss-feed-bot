@@ -40,7 +40,7 @@ def telegram(section, title, link):
         image = None
 
     link = f'https://t.me/iv?url={link}&rhash=5e3df8a7095695'
-    message = f'{title}: {link} #{section} #SGLiveNews'
+    message = f'#{section} {title}'
 
     if image is None:
         requests.post(
@@ -48,6 +48,14 @@ def telegram(section, title, link):
             json={
                 'chat_id': '@sglivenews',
                 'text': message,
+                'reply_markup': {
+                    'inline_keyboard': [
+                        [{
+                            'text': 'Read More',
+                            'url': link
+                        }]
+                    ]
+                }
             }
         )
     else:
@@ -57,6 +65,14 @@ def telegram(section, title, link):
                 'chat_id': '@sglivenews',
                 'photo': image,
                 'caption': message,
+                'reply_markup': {
+                    'inline_keyboard': [
+                        [{
+                            'text': 'Read More',
+                            'url': link
+                        }]
+                    ]
+                }
             }
         )
 
