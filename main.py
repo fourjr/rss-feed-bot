@@ -90,10 +90,10 @@ while True:
             title = articles[0].findtext('title')
             description = articles[0].findtext('description')
             link = articles[0].findtext('link')
-            if title not in v:
+            if link not in v:
                 tweet(k, title, link)
                 telegram(k, title, link)
-                QUERY[k].append(title)
+                QUERY[k].append(link)
                 print(f'Posted {title}')
                 with open('save.json', 'w+') as f:
                     json.dump(QUERY, f)
