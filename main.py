@@ -31,9 +31,6 @@ def tweet(section, title, link):
     )
 
 def telegram(section, title, link):
-    link = f'https://t.me/iv?url={link}&rhash=5e3df8a7095695'
-    message = f'{title}: {link} #{section} #SGLiveNews'
-
     site = requests.get(link, headers={'User-Agent': 'X'})
     soup = BeautifulSoup(site.content, 'lxml')
     image_data = soup.find('meta', property='og:image')
@@ -41,6 +38,9 @@ def telegram(section, title, link):
         image = image_data['content']
     else:
         image = None
+
+    link = f'https://t.me/iv?url={link}&rhash=5e3df8a7095695'
+    message = f'{title}: {link} #{section} #SGLiveNews'
 
     if image is None:
         requests.post(
