@@ -3,6 +3,7 @@ import os
 import time
 
 import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from lxml import etree
 from requests_oauthlib import OAuth1
@@ -32,13 +33,32 @@ def tweet(section, title, link):
 def telegram(section, title, link):
     link = f'https://t.me/iv?url={link}&rhash=5e3df8a7095695'
     message = f'{title}: {link} #{section} #SGLiveNews'
-    requests.post(
-        f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendMessage',
-        json={
-            'chat_id': '@sglivenews',
-            'text': message,
-        }
-    )
+
+    site = requests.get(link, headers={'User-Agent': 'X'})
+    soup = BeautifulSoup(site.content, 'lxml')
+    image_data = soup.find('meta', property='og:image')
+    if image_data:
+        image = image_data['content']
+    else:
+        image = None
+
+    if image is None:
+        requests.post(
+            f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendMessage',
+            json={
+                'chat_id': '@sglivenews',
+                'text': message,
+            }
+        )
+    else:
+        requests.post(
+            f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendPhoto',
+            json={
+                'chat_id': '@sglivenews',
+                'photo': image,
+                'caption': message,
+            }
+        )
 
 BASE = 'https://www.straitstimes.com/news/{feed}/rss.xml'
 QUERY = {

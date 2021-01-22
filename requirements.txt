@@ -2,3 +2,4 @@ requests
 python-dotenv
 lxml
 requests_oauthlib
+bs4
