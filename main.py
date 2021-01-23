@@ -90,10 +90,10 @@ while True:
             root = etree.fromstring(req.text.encode())
             articles = root.find('channel').findall('item')
 
-            if articles:
-                title = articles[0].findtext('title')
-                description = articles[0].findtext('description')
-                link = articles[0].findtext('link')
+            for i in articles:
+                title = i.findtext('title')
+                description = i.findtext('description')
+                link = i.findtext('link')
                 if link not in completed:
                     tweet(category, title, link)
                     telegram(category, title, link)
