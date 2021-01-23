@@ -1,14 +1,23 @@
 keys:
   twitter:
+    enabled: true
     consumer_key:
     consumer_secret:
     access_token:
     access_secret:
   telegram:
+    enabled: true
     bot_token:
     chat_id:
 
 feeds:
+  - root: https://www.straitstimes.com/news/{feed}/rss.xml
+    categories:
+      - singapore
+      - world
+      - asia
+      - tech
+      - opinion
   - root:
     categories:
       -

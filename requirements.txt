@@ -1,5 +1,5 @@
-requests
-lxml
-requests_oauthlib
-bs4
-pyyaml
+bs4==0.0.1
+lxml==4.6.2
+pyyaml==5.3.1
+requests==2.24.0
+requests_oauthlib==1.3.0
