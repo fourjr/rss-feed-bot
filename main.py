@@ -95,11 +95,11 @@ while True:
                 description = i.findtext('description')
                 link = i.findtext('link')
                 if link not in completed:
-                    tweet(category, title, link)
+                    # tweet(category, title, link)
                     telegram(category, title, link)
                     completed.add(link)
                     print(f'Posted {title}')
                     with open('save.tmp', 'w+') as f:
                         f.write('\n'.join(completed))
 
-        time.sleep(3)
+        time.sleep(1)
