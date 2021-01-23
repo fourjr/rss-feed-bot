@@ -139,4 +139,4 @@ cython_debug/
 
 # custom
 .env
-save.json
+save.tmp

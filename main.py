@@ -17,6 +17,9 @@ oauth = OAuth1(
     os.environ['ACCESS_SECRET'],
 )
 
+dev_mode = bool(os.getenv('DEV_MODE', False))
+chat_id = '@sglivenews' if not dev_mode else -1001430134386
+
 def tweet(section, title, link):
     message = f'{title}: {link} #{section} #SGLiveNews'
     requests.post(
@@ -48,7 +51,7 @@ def telegram(section, title, link):
         requests.post(
             f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendMessage',
             json={
-                'chat_id': '@sglivenews',
+                'chat_id': chat_id,
                 'text': message,
                 'reply_markup': {
                     'inline_keyboard': [
@@ -64,7 +67,7 @@ def telegram(section, title, link):
         requests.post(
             f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendPhoto',
             json={
-                'chat_id': '@sglivenews',
+                'chat_id': chat_id,
                 'photo': image,
                 'caption': message,
                 'reply_markup': {
@@ -79,26 +82,28 @@ def telegram(section, title, link):
         )
 
 BASE = 'https://www.straitstimes.com/news/{feed}/rss.xml'
-QUERY = {
-    'singapore': [],
-    'asia': [],
-    'tech': [],
-    'world': [],
-    'opinion': []
-}
+QUERY = [
+    'singapore',
+    'asia',
+    'tech',
+    'world',
+    'opinion'
+]
+
+completed = set()
 
 try:
-    with open('save.json') as f:
-        QUERY.update(json.load(f))
+    with open('save.tmp') as f:
+        completed.add(f.readlines())
 except FileNotFoundError:
     pass
 
 print('Started')
 
 while True:
-    for k, v in QUERY.items():
+    for category in QUERY:
         req = requests.get(
-            BASE.format(feed=k),
+            BASE.format(feed=category),
             headers={'User-Agent': 'SGLiveNews'}
         )
         root = etree.fromstring(req.text.encode())
@@ -108,12 +113,12 @@ while True:
             title = articles[0].findtext('title')
             description = articles[0].findtext('description')
             link = articles[0].findtext('link')
-            if link not in v:
-                tweet(k, title, link)
-                telegram(k, title, link)
-                QUERY[k].append(link)
+            if link not in completed:
+                tweet(category, title, link)
+                telegram(category, title, link)
+                completed.add(link)
                 print(f'Posted {title}')
-                with open('save.json', 'w+') as f:
-                    json.dump(QUERY, f)
+                with open('save.tmp', 'w+') as f:
+                    f.write('\n'.join(completed))
 
     time.sleep(3)
