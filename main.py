@@ -70,13 +70,11 @@ def telegram(section, title, link):
     )
 
 
-completed = set()
-
 try:
     with open('save.tmp') as f:
-        completed |= set(f.read().splitlines())
+        completed = set(f.read().splitlines())
 except FileNotFoundError:
-    pass
+    completed = set()
 
 print('Started')
 
