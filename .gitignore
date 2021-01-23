@@ -138,5 +138,5 @@ dmypy.json
 cython_debug/
 
 # custom
-.env
+config.yml
 save.tmp

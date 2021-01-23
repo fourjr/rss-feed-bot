@@ -1,0 +1,18 @@
+keys:
+  twitter:
+    consumer_key:
+    consumer_secret:
+    access_token:
+    access_secret:
+  telegram:
+    bot_token:
+    chat_id:
+
+feeds:
+  - root:
+    categories:
+      -
+      -
+      -
+      -
+      -

@@ -1,24 +1,22 @@
-import json
-import os
+import yaml
 import time
 
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 from lxml import etree
 from requests_oauthlib import OAuth1
 
-load_dotenv()
+
+with open('config.yml') as f:
+    CONFIG = yaml.load(f, Loader=yaml.BaseLoader)
 
 oauth = OAuth1(
-    os.environ['CONSUMER_KEY'],
-    os.environ['CONSUMER_SECRET'],
-    os.environ['ACCESS_TOKEN'],
-    os.environ['ACCESS_SECRET'],
+    CONFIG['keys']['twitter']['consumer_key'],
+    CONFIG['keys']['twitter']['consumer_secret'],
+    CONFIG['keys']['twitter']['access_token'],
+    CONFIG['keys']['twitter']['access_secret'],
 )
 
-dev_mode = bool(os.getenv('DEV_MODE', False))
-chat_id = '@sglivenews' if not dev_mode else -1001430134386
 
 def tweet(section, title, link):
     message = f'{title}: {link} #{section} #SGLiveNews'
@@ -32,6 +30,7 @@ def tweet(section, title, link):
         },
         auth=oauth
     )
+
 
 def telegram(section, title, link):
     site = requests.get(link, headers={'User-Agent': 'X'})
@@ -47,48 +46,29 @@ def telegram(section, title, link):
     if image == 'https://www.straitstimes.com/sites/all/themes/custom/bootdemo/images/facebook_default_pic_new.jpg':
         image = None
 
-    if image is None:
-        requests.post(
-            f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendMessage',
-            json={
-                'chat_id': chat_id,
-                'text': message,
-                'reply_markup': {
-                    'inline_keyboard': [
-                        [{
-                            'text': 'Read More',
-                            'url': link
-                        }]
-                    ]
-                }
-            }
-        )
-    else:
-        requests.post(
-            f'https://api.telegram.org/bot{os.environ["TELEGRAM_BOT_TOKEN"]}/sendPhoto',
-            json={
-                'chat_id': chat_id,
-                'photo': image,
-                'caption': message,
-                'reply_markup': {
-                    'inline_keyboard': [
-                        [{
-                            'text': 'Read More',
-                            'url': link
-                        }]
-                    ]
-                }
-            }
-        )
+    data = {
+        'chat_id': CONFIG['keys']['telegram']['chat_id'],
+        'reply_markup': {
+            'inline_keyboard': [
+                [{
+                    'text': 'Read More',
+                    'url': link
+                }]
+            ]
+        }
+    }
 
-BASE = 'https://www.straitstimes.com/news/{feed}/rss.xml'
-QUERY = [
-    'singapore',
-    'asia',
-    'tech',
-    'world',
-    'opinion'
-]
+    if image is None:
+        data['text'] = message
+    else:
+        data['photo'] = image
+        data['caption'] = message
+
+    requests.post(
+        f'https://api.telegram.org/bot{CONFIG["keys"]["telegram"]["bot_token"]}/sendPhoto',
+        json=data
+    )
+
 
 completed = set()
 
@@ -101,24 +81,25 @@ except FileNotFoundError:
 print('Started')
 
 while True:
-    for category in QUERY:
-        req = requests.get(
-            BASE.format(feed=category),
-            headers={'User-Agent': 'SGLiveNews'}
-        )
-        root = etree.fromstring(req.text.encode())
-        articles = root.find('channel').findall('item')
+    for feed in CONFIG['feeds']:
+        for category in feed['categories']:
+            req = requests.get(
+                feed['root'].format(feed=category),
+                headers={'User-Agent': 'SGLiveNews'}
+            )
+            root = etree.fromstring(req.text.encode())
+            articles = root.find('channel').findall('item')
 
-        if articles:
-            title = articles[0].findtext('title')
-            description = articles[0].findtext('description')
-            link = articles[0].findtext('link')
-            if link not in completed:
-                tweet(category, title, link)
-                telegram(category, title, link)
-                completed.add(link)
-                print(f'Posted {title}')
-                with open('save.tmp', 'w+') as f:
-                    f.write('\n'.join(completed))
+            if articles:
+                title = articles[0].findtext('title')
+                description = articles[0].findtext('description')
+                link = articles[0].findtext('link')
+                if link not in completed:
+                    tweet(category, title, link)
+                    telegram(category, title, link)
+                    completed.add(link)
+                    print(f'Posted {title}')
+                    with open('save.tmp', 'w+') as f:
+                        f.write('\n'.join(completed))
 
-    time.sleep(3)
+        time.sleep(3)
