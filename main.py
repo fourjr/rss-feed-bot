@@ -94,7 +94,7 @@ completed = set()
 
 try:
     with open('save.tmp') as f:
-        completed |= set(f.readlines())
+        completed |= set(f.read().splitlines())
 except FileNotFoundError:
     pass
 
