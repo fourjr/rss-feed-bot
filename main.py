@@ -39,8 +39,10 @@ def telegram(section, title, link):
     else:
         image = None
 
-    link = f'https://t.me/iv?url={link}&rhash=5e3df8a7095695'
     message = f'#{section} {title}'
+
+    if image == 'https://www.straitstimes.com/sites/all/themes/custom/bootdemo/images/facebook_default_pic_new.jpg':
+        image = None
 
     if image is None:
         requests.post(
