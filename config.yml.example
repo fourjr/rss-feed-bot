@@ -12,6 +12,8 @@ keys:
 
 feeds:
   - root: https://www.straitstimes.com/news/{feed}/rss.xml
+    source: ST
+    word_filter: covid
     categories:
       - singapore
       - world
@@ -19,6 +21,7 @@ feeds:
       - tech
       - opinion
   - root:
+    source:
     categories:
       -
       -

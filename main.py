@@ -8,10 +8,10 @@ from requests_oauthlib import OAuth1
 
 
 with open('config.yml') as f:
-    CONFIG = yaml.load(f, Loader=yaml.BaseLoader)
+    CONFIG = yaml.load(f, Loader=yaml.SafeLoader)
 
 
-def tweet(section, title, link):
+def tweet(source, section, title, link):
     if CONFIG['keys']['twitter']['enabled']:
         oauth = OAuth1(
             CONFIG['keys']['twitter']['consumer_key'],
@@ -20,8 +20,8 @@ def tweet(section, title, link):
             CONFIG['keys']['twitter']['access_secret'],
         )
 
-        message = f'{title}: {link} #{section} #SGLiveNews'
-        requests.post(
+        message = f'{title}: {link} #{source} #{section} #SGLiveNews'
+        r = requests.post(
             'https://api.twitter.com/1.1/statuses/update.json',
             params={
                 'status': message
@@ -32,8 +32,11 @@ def tweet(section, title, link):
             auth=oauth
         )
 
+        if r.status_code != 200:
+            print(f'Error posting {link} to twitter: {r.text}')
 
-def telegram(section, title, link):
+
+def telegram(source, section, title, link):
     if CONFIG['keys']['telegram']['enabled']:
         site = requests.get(link, headers={'User-Agent': 'fourjr/rss-feed-bot'})
         soup = BeautifulSoup(site.content, 'lxml')
@@ -43,7 +46,7 @@ def telegram(section, title, link):
         else:
             image = None
 
-        message = f'#{section} {title}'
+        message = f'#{source} #{section} {title}'
 
         if image == 'https://www.straitstimes.com/sites/all/themes/custom/bootdemo/images/facebook_default_pic_new.jpg':
             image = None
@@ -66,10 +69,12 @@ def telegram(section, title, link):
             data['photo'] = image
             data['caption'] = message
 
-        requests.post(
+        r = requests.post(
             f'https://api.telegram.org/bot{CONFIG["keys"]["telegram"]["bot_token"]}/sendPhoto',
             json=data
         )
+        if r.status_code != 200:
+            print(f'Error posting {link} to telegram: {r.text}')
 
 
 try:
@@ -91,14 +96,15 @@ while True:
             articles = root.find('channel').findall('item')
 
             for i in articles:
-                title = i.findtext('title')
-                link = i.findtext('link')
-                if link not in completed:
-                    tweet(category, title, link)
-                    telegram(category, title, link)
-                    completed.add(link)
-                    print(f'Posted {title}')
-                    with open('save.tmp', 'w+') as f:
-                        f.write('\n'.join(completed))
+                title = i.findtext('title').strip()
+                if not feed.get('word_filter') or feed['word_filter'] in title:
+                    link = i.findtext('link').strip()
+                    if link not in completed:
+                        tweet(feed['source'], category, title, link)
+                        telegram(feed['source'], category, title, link)
+                        completed.add(link)
+                        print(f'Posted {title}')
+                        with open('save.tmp', 'w+') as f:
+                            f.write('\n'.join(completed))
 
         time.sleep(1)
