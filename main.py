@@ -109,7 +109,7 @@ while True:
 
             for i in articles:
                 title = i.findtext('title').strip()
-                if not feed.get('word_filter') or feed['word_filter'] in title:
+                if not feed.get('word_filter') or feed['word_filter'].lower() in title.lower():
                     link = i.findtext('link').strip()
                     if link not in completed:
                         tweet(feed['source'], name, title, link)
