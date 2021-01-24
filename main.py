@@ -41,6 +41,11 @@ def telegram(source, section, title, link):
         site = requests.get(link, headers={'User-Agent': 'fourjr/rss-feed-bot'})
         soup = BeautifulSoup(site.content, 'lxml')
         image_data = soup.find('meta', property='og:image')
+
+        is_premium = soup.find('div', {'class': 'premium-read-more'})
+        if is_premium:
+            title = '[Premium] ' + title
+
         if image_data:
             image = image_data['content']
         else:
@@ -88,8 +93,15 @@ print('Started')
 while True:
     for feed in CONFIG['feeds']:
         for category in feed['categories']:
+            if isinstance(category, dict):
+                id = category['id']
+                name = category['name']
+            else:
+                id = str(category)
+                name = str(category)
+
             req = requests.get(
-                feed['root'].format(feed=category),
+                feed['root'].format(feed=id),
                 headers={'User-Agent': 'fourjr/rss-feed-bot'}
             )
             root = etree.fromstring(req.text.encode())
@@ -100,8 +112,8 @@ while True:
                 if not feed.get('word_filter') or feed['word_filter'] in title:
                     link = i.findtext('link').strip()
                     if link not in completed:
-                        tweet(feed['source'], category, title, link)
-                        telegram(feed['source'], category, title, link)
+                        tweet(feed['source'], name, title, link)
+                        telegram(feed['source'], name, title, link)
                         completed.add(link)
                         print(f'Posted {title}')
                         with open('save.tmp', 'w+') as f:

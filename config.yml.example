@@ -20,6 +20,11 @@ feeds:
       - asia
       - tech
       - opinion
+  - root: https://www.scmp.com/rss/{feed}/feed
+    source: SCMP
+    categories:
+      - id: 36
+        name: tech
   - root:
     source:
     categories:
