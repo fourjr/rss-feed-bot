@@ -19,8 +19,12 @@ def tweet(source, section, title, link):
             CONFIG['keys']['twitter']['access_token'],
             CONFIG['keys']['twitter']['access_secret'],
         )
+        
+        message = f'{title}: {link} '
+        if source:
+            message += f'#{source} '
+        message += f'#{section} #SGLiveNews'
 
-        message = f'{title}: {link} #{source} #{section} #SGLiveNews'
         r = requests.post(
             'https://api.twitter.com/1.1/statuses/update.json',
             params={
@@ -51,7 +55,12 @@ def telegram(source, section, title, link):
         else:
             image = None
 
-        message = f'#{source} #{section} {title}'
+        if source:
+            message = f'#{source} '
+        else:
+            message = ''
+
+        message += f'#{section} {title}'
 
         if image == 'https://www.straitstimes.com/sites/all/themes/custom/bootdemo/images/facebook_default_pic_new.jpg':
             image = None
@@ -94,14 +103,14 @@ while True:
     for feed in CONFIG['feeds']:
         for category in feed['categories']:
             if isinstance(category, dict):
-                id = category['id']
+                feed_id = category['id']
                 name = category['name']
             else:
-                id = str(category)
+                feed_id = str(category)
                 name = str(category)
 
             req = requests.get(
-                feed['root'].format(feed=id),
+                feed['root'].format(feed=feed_id),
                 headers={'User-Agent': 'fourjr/rss-feed-bot'}
             )
             root = etree.fromstring(req.text.encode())
@@ -112,8 +121,8 @@ while True:
                 if not feed.get('word_filter') or feed['word_filter'].lower() in title.lower():
                     link = i.findtext('link').strip()
                     if link not in completed:
-                        tweet(feed['source'], name, title, link)
-                        telegram(feed['source'], name, title, link)
+                        tweet(feed.get('source'), name, title, link)
+                        telegram(feed.get('source'), name, title, link)
                         completed.add(link)
                         print(f'Posted {title}')
                         with open('save.tmp', 'w+') as f:
