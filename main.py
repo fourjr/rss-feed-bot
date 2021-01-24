@@ -70,12 +70,14 @@ def telegram(source, section, title, link):
 
         if image is None:
             data['text'] = message
+            endpoint = 'Message'
         else:
             data['photo'] = image
             data['caption'] = message
+            endpoint = 'Photo'
 
         r = requests.post(
-            f'https://api.telegram.org/bot{CONFIG["keys"]["telegram"]["bot_token"]}/sendPhoto',
+            f'https://api.telegram.org/bot{CONFIG["keys"]["telegram"]["bot_token"]}/send{endpoint}',
             json=data
         )
         if r.status_code != 200:
