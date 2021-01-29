@@ -62,7 +62,7 @@ def telegram(source, section, title, link):
 
         message += f'#{section} {title}'
 
-        if image == 'https://www.straitstimes.com/sites/all/themes/custom/bootdemo/images/facebook_default_pic_new.jpg':
+        if image in ('https://www.straitstimes.com/sites/all/themes/custom/bootdemo/images/facebook_default_pic_new.jpg', 'https://static.straitstimes.com.sg/s3fs-public/styles/x_large/public/articles/2020/12/17/st-forum-thumbnail-100_0.jpg?itok=5trYPIvN'):
             image = None
 
         data = {
