@@ -33,3 +33,7 @@ feeds:
       -
       -
       -
+
+config:
+  block_images:
+    - https://xx.jpg

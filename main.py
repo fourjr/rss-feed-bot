@@ -62,7 +62,7 @@ def telegram(source, section, title, link):
 
         message += f'#{section} {title}'
 
-        if image in ('https://www.straitstimes.com/sites/all/themes/custom/bootdemo/images/facebook_default_pic_new.jpg', 'https://static.straitstimes.com.sg/s3fs-public/styles/x_large/public/articles/2020/12/17/st-forum-thumbnail-100_0.jpg?itok=5trYPIvN'):
+        if image in CONFIG['config'].get('block_images', []):
             image = None
 
         data = {
@@ -89,8 +89,17 @@ def telegram(source, section, title, link):
             f'https://api.telegram.org/bot{CONFIG["keys"]["telegram"]["bot_token"]}/send{endpoint}',
             json=data
         )
+        if r.status_code == 429:
+            try:
+                retry_after = r.json()['parameters']['retry_after']
+            except KeyError:
+                pass
+            else:
+                time.sleep(retry_after)
+                return telegram(source, section, title, link)  # retry
+
         if r.status_code != 200:
-            print(f'Error posting {link} to telegram: {r.text}')
+            print(f'Error posting {link} to telegram: {r.status_code} - {r.text}')
 
 
 try:
