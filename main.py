@@ -23,7 +23,7 @@ def tweet(source, section, title, link):
         message = f'{title}: {link} '
         if source:
             message += f'#{source} '
-        message += f'#{section} #SGLiveNews'
+        message += f'#{section}'
 
         r = requests.post(
             'https://api.twitter.com/1.1/statuses/update.json',
@@ -38,6 +38,36 @@ def tweet(source, section, title, link):
 
         if r.status_code != 200:
             print(f'Error posting {link} to twitter: {r.text}')
+
+
+def discord(source, section, title, link):
+    if CONFIG['keys']['discord']['enabled']:
+        message = f'{title}: {link} '
+        if source:
+            message += f'#{source} '
+        message += f'#{section}'
+
+        r = requests.post(
+            CONFIG['keys']['discord']['webhook'],
+            json={
+                'content': message
+            },
+            headers={
+                'User-Agent': 'fourjr/rss-feed-bot'
+            }
+        )
+
+        if r.status_code == 429:
+            try:
+                retry_after = r.json()['retry_after']
+            except KeyError:
+                pass
+            else:
+                time.sleep(retry_after / 1000)
+                return telegram(source, section, title, link)  # retry
+
+        if r.status_code != 204:
+            print(f'Error posting {link} to discord: {r.text}')
 
 
 def telegram(source, section, title, link):
@@ -132,8 +162,10 @@ while True:
                 if not feed.get('word_filter') or feed['word_filter'].lower() in title.lower():
                     link = i.findtext('link').strip()
                     if link not in completed:
-                        tweet(feed.get('source'), name, title, link)
-                        telegram(feed.get('source'), name, title, link)
+                        source = feed.get('source')
+                        tweet(source, name, title, link)
+                        telegram(source, name, title, link)
+                        discord(source, name, title, link)
                         completed.add(link)
                         print(f'Posted {title}')
                         with open('save.tmp', 'w+') as f:

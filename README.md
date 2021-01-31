@@ -10,10 +10,12 @@ Telegram: [@SGLiveNews](https://t.me/sglivenews)
 2. Obtain twitter keys from [Twitter Developer API Dashboard](https://developer.twitter.com/en/portal/dashboard).
 3. Obtain telegram keys from [Botfather](https://core.telegram.org/bots#creating-a-new-bot).
 4. Create a telegram channel or group chat and [obtain the chat_id](https://2ngc6.csb.app/). If your telegram channel is public, setting the `chat_id` as `@linkname` will work as well.
-5. Find an RSS Feed (e.g. [Straits Times Singapore](https://www.straitstimes.com/RSS-Feeds)).
-6. Obtain root url (e.g. https://www.straitstimes.com/news/{feed}/rss.xml), {feed} is a template variable that will be filled in by the script.
-7. Fill in the various categories that you wish to scrape.
-8. You may include as many feeds as desired. The more feeds, the longer a cycle will take.
+5. Obtain a discord channel and [obtain the webhook URL](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+6. Find an RSS Feed (e.g. [Straits Times Singapore](https://www.straitstimes.com/RSS-Feeds)).
+7. Obtain root url (e.g. https://www.straitstimes.com/news/{feed}/rss.xml), {feed} is a template variable that will be filled in by the script.
+8. Fill in the various categories that you wish to scrape.
+9. You may include as many feeds as desired. The more feeds, the longer a cycle will take.
+10. You may disable specific services (twitter/telegram/discord) in the config file.
 
 ## Using the script
 1. [Python 3.6+](https://www.python.org/downloads/) is required.
